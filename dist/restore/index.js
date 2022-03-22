@@ -46440,6 +46440,18 @@ function checkKey(key) {
     }
 }
 /**
+ * isEnable to check the presence of Artifact cache service.
+ *
+ * @returns boolean
+ */
+function isEnable() {
+    if (process.env['ACTIONS_CACHE_URL']) {
+        return true;
+    }
+    return false;
+}
+exports.isEnable = isEnable;
+/**
  * Restores cache from keys
  *
  * @param paths a list of file paths to restore from the cache
@@ -48100,8 +48112,13 @@ const utils = __importStar(__webpack_require__(443));
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            if (utils.isGhes()) {
-                utils.logWarning("Cache action is not supported on GHES. See https://github.com/actions/cache/issues/505 for more details");
+            if (!cache.isEnable()) {
+                if (utils.isGhes()) {
+                    utils.logWarning("Cache action is only supported on GHES version >= 3.5. If you are on version >=3.5 Please check if ArtifactCache is enabled or not using config 'app.actions.artifactcache.enabled'.");
+                }
+                else {
+                    utils.logWarning("Something is going wrong with ArtifactCache service which supports cache actions. Please check https://www.githubstatus.com/ for any ongoing issue in actions.");
+                }
                 utils.setCacheHitOutput(false);
                 return;
             }
